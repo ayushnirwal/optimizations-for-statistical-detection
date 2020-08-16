@@ -164,7 +164,7 @@ def compare_result(prediction_mask,overlay,thres):
 
     # precision = TP/(TP+FP)
     # recall = TP/(TP+FN)
-    # accuracy = 2*precision*recall/(precision+recall)
+    # f1_score = 2*precision*recall/(precision+recall)
 
     
     return overlay
@@ -203,7 +203,7 @@ SD_threshold = 0
 min_pixel_distance = 100
 check_offset = 5
 
-for img_no in [1]:
+for img_no in range(1,51):
     print("image_no :",img_no)
     
     img_path = "./Dataset/im" + str(img_no) + "_t.bmp"
@@ -221,16 +221,14 @@ for img_no in [1]:
     mask_gray = cv2.cvtColor(mask, cv2.COLOR_RGB2GRAY)
     img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-    # , int (img_gray.shape[0]*0.035),int (img_gray.shape[0]*0.02), int (img_gray.shape[0]*0.025),int (img_gray.shape[0]*0.01)
 
-    block_sizes =[ int (img_gray.shape[0]*0.03), int (img_gray.shape[0]*0.035),int (img_gray.shape[0]*0.02), int (img_gray.shape[0]*0.025),int (img_gray.shape[0]*0.06),int (img_gray.shape[0]*0.05)]
+    block_sizes =[100]
     pms = []
 
     for block_size in block_sizes:
         
         
         pm1 = CPF( img_gray,mask_gray,block_size,mean_threshold,SD_threshold,min_pixel_distance,check_offset)
-        #pm1 = chunck_remover( int (img_gray.shape[0]*0.1)  , 255 * 0.3, pm1)
         pms.append( pm1 )
 
     additive = int(255/ len( pms ))
@@ -252,8 +250,9 @@ for img_no in [1]:
 
     plt.figure(1)
     plt.imshow(overlay , cmap="gray")
+    output = "CMF_single_5_"+str(img_no)+".png"
 
-    mpimg.imsave('output1.png', overlay , cmap="gray")
+    mpimg.imsave(output, overlay , cmap="gray")
     
 
     

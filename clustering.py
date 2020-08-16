@@ -13,7 +13,7 @@ from PIL import Image
 
 img_no = 25
 
-img_path = "name.png"
+img_path = "output1.png"
 mask_path = "./Dataset/im" + str(img_no) + "_t_mask.bmp"
 
 
@@ -34,12 +34,18 @@ plt.imshow(img_gray)
 plt.figure(2)
 plt.imshow(mask_gray)
 
-overlay = np.multiply(2,np.subtract(0.5,np.absolute(np.subtract(mask_gray,img_gray))))
+op1 = np.subtract(0.5,np.absolute(np.subtract(mask_gray,img_gray)))
+
+op2 = np.subtract(1,np.absolute(np.subtract(mask_gray,img_gray)))
 
 plt.figure(3)
-plt.imshow(overlay)
+plt.imshow(op1)
+
+plt.figure(4)
+plt.imshow(op2)
 
 
-print(np.mean(overlay) )
+
+
 
 plt.show()
