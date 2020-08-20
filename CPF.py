@@ -13,7 +13,7 @@ from PIL import Image
 
 
 
-def CPF(img_gray,mask_gray,block_size,mean_threshold,SD_threshold,min_pixel_distance,check_offset):
+def CPF(img_gray,mask_gray,block_size,mean_threshold,SD_threshold,min_pixel_distance,check_offset,SD_TH):
     
     
 
@@ -32,6 +32,7 @@ def CPF(img_gray,mask_gray,block_size,mean_threshold,SD_threshold,min_pixel_dist
     #print("making blocks and calculating mean with block_size = " + str(block_size))
 
     block_counter = 0
+    
     for i in range(0, row):
         for j in range(0, column):
 
@@ -43,6 +44,8 @@ def CPF(img_gray,mask_gray,block_size,mean_threshold,SD_threshold,min_pixel_dist
             d['SD'] = np.std(block)
             d['i'] =    i
             d['j'] =    j
+            
+
 
             data.append(d)
 
@@ -50,6 +53,7 @@ def CPF(img_gray,mask_gray,block_size,mean_threshold,SD_threshold,min_pixel_dist
             
             
     #print("Done")
+    
 
     # sorting according to Mean
     sorted_mean = sorted(data, key=lambda element: element['M']) 
@@ -70,10 +74,18 @@ def CPF(img_gray,mask_gray,block_size,mean_threshold,SD_threshold,min_pixel_dist
 
             distance = np.linalg.norm(coor1-coor2)
 
-            if mean_similarity <= mean_threshold and SD_similarity <= SD_threshold and distance >= min_pixel_distance:
-                
-                sim_array.append(sorted_mean[i])
-                sim_array.append(sorted_mean[j])
+            if SD_TH == None:
+
+                if mean_similarity <= mean_threshold and SD_similarity <= SD_threshold and distance >= min_pixel_distance:
+                    
+                    sim_array.append(sorted_mean[i])
+                    sim_array.append(sorted_mean[j])
+            else:
+
+                if mean_similarity <= mean_threshold and SD_similarity <= SD_threshold and distance >= min_pixel_distance and  abs( sorted_mean[j]['SD'] >= SD_TH) :
+                    
+                    sim_array.append(sorted_mean[i])
+                    sim_array.append(sorted_mean[j])
 
 
     #creating prediction mask from similar blocks
@@ -203,7 +215,7 @@ SD_threshold = 0
 min_pixel_distance = 100
 check_offset = 5
 
-for img_no in range(1,51):
+for img_no in [22,23,24,25]:
     print("image_no :",img_no)
     
     img_path = "./Dataset/im" + str(img_no) + "_t.bmp"
@@ -222,37 +234,38 @@ for img_no in range(1,51):
     img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
 
-    block_sizes =[100]
+    block_sizes =[5,10,15,20,25,30]
+    SD_THs = [None,1,2,3,4]
     pms = []
+    counter = 1
+    for size in block_sizes:
+        for SD_TH in SD_THs:
+            
+            print("size :",size," SD_TH:",SD_TH)
+            
+            pm = CPF( img_gray,mask_gray,size,mean_threshold,SD_threshold,min_pixel_distance,check_offset,SD_TH)
 
-    for block_size in block_sizes:
-        
-        
-        pm1 = CPF( img_gray,mask_gray,block_size,mean_threshold,SD_threshold,min_pixel_distance,check_offset)
-        pms.append( pm1 )
+            output = str(img_no)+"_"+str(counter)+".png"
 
-    additive = int(255/ len( pms ))
+            mpimg.imsave(output, pm , cmap="gray")
 
-    overlay = np.multiply ( np.divide( pms[0] , 255) ,additive)
+            counter+=1
+            
 
     
 
     
-    for it in range(1,len(pms)):
 
-        for i in range(0,overlay.shape[0]):
-            for j in range(0,overlay.shape[1]):
-                if overlay[i][j] > 0 and pms[it][i][j] > 0:
-                    overlay[i][j] += additive
+    
                 
 
 
 
-    plt.figure(1)
-    plt.imshow(overlay , cmap="gray")
-    output = "CMF_single_5_"+str(img_no)+".png"
+    
 
-    mpimg.imsave(output, overlay , cmap="gray")
+    
+
+
     
 
     

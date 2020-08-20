@@ -232,18 +232,18 @@ def f1_score(mask,prediction):
     f1_score = 2*precision*recall/(precision+recall)
 
     
-    return f1_score
+    return f1_score,overlay
 
 
 
 
 
 
-images = [1,7,9,11,16,25,38,43]
+images = [1]
 
 for img_no in images:
 
-    img_path = "./results/CMF_mul_" + str(img_no) + ".png"
+    img_path = "CMF_81.png"
     mask_path = "./Dataset/im" + str(img_no) + "_t_mask.bmp"
 
 
@@ -260,23 +260,41 @@ for img_no in images:
 
     
 
+    
     plt.figure(1)
     plt.imshow(img_gray)
 
-    img_gray = chunck_remover(int(img_gray.shape[0]*0.05),0.5,img_gray)
+    
+    img_gray = sasta_diffuse(10,img_gray)
+    img_gray = Pass_filter(img_gray,0.15,0.15)
     
 
-    img_gray = sasta_diffuse(int(img_gray.shape[0]*0.05),img_gray)
+    
+    img_gray = sasta_diffuse(10,img_gray)
+    img_gray = sasta_diffuse(10,img_gray)
+    img_gray = sasta_diffuse(10,img_gray)
     
 
-    img_gray = Pass_filter(img_gray,0.7,0.7)
+    plt.figure(3)
+    plt.imshow(img_gray)
+
+    img_gray = Pass_filter(img_gray,0.25,0.25)
+    
+
+    score,overlay = f1_score(mask_gray,img_gray)
+
+    plt.figure(2)
+    plt.imshow(overlay)
+    plt.show()
 
     
     print ("img_no ",img_no)
 
     
     print("   cross correlation:",cross_correlation( mask_gray,img_gray))
-    print("   f1_score:",f1_score(mask_gray,img_gray))
+    print("   f1_score:",score)
+
+  
 
     
 
